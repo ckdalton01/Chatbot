@@ -50,29 +50,14 @@ llm = init_chat_model(
     batch_size=8,
 )
 
-# prompt template
-prompt_template = PromptTemplate.from_template("""
-You are a helpful assistant. You will be provided with a query for Patch My PC, a software company.
-Assume unless otherwise specified, the person is asking about products related to Patch My PC.
+# pulling prompt from hub
+prompt_file_path = os.getenv("PROMPT_FILE")
 
-Before answering, consider what the underlying intent of the query is, and expand abbreviations or acronyms where needed to improve retrieval.
+with open(prompt_file_path, "r", encoding="utf-8") as f:
+    prompt_template_str = f.read()
 
-Use the following retrieved context to answer the user's question.
-If you don’t know the answer, say “I don’t know.”
+prompt = PromptTemplate.from_template(prompt_template_str)
 
-Context:
-{context}
-
-User Question:
-{question}
-
-Please provide a concise and informative response based on the retrieved information.
-If you don't know the answer, say "I don't know" (and don't provide a source).
-
-Return text as follows:
-<Answer to the question>
-Include the source URL(s) in your response when relevant by citing: "Source: <URL>".
-""")
 
 # Streamlit UI setup
 st.set_page_config(page_title="DaltonBot3000", page_icon="🐻")

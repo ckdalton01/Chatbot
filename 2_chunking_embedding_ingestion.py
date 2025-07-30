@@ -36,8 +36,8 @@ vector_store = Chroma(
 ###############################   INITIALIZE TEXT SPLITTER   ###################################################################################################
 
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=450,
-    chunk_overlap=200,
+    chunk_size=1024,
+    chunk_overlap=256,
     length_function=len,
     is_separator_regex=False,
 )
