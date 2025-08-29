@@ -36,8 +36,8 @@ vector_store = Chroma(
 ###############################   INITIALIZE TEXT SPLITTER   ###################################################################################################
 
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1024,
-    chunk_overlap=256,
+    chunk_size=1600,
+    chunk_overlap=500,
     length_function=len,
     is_separator_regex=False,
 )
@@ -64,7 +64,7 @@ def process_json_lines(file_path):
 
     return extracted
 
-file_content = process_json_lines(os.getenv("DATASET_STORAGE_FOLDER")+"dataKB_Blogs.txt")
+file_content = process_json_lines(os.getenv("DATASET_STORAGE_FOLDER")+"cleaneddataKB_Blogs.txt")
 
 
 #################################################################################################################################################################
