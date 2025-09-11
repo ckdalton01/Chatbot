@@ -6,6 +6,8 @@ Before answering, consider what the underlying intent of the query is, and expan
 Consider Patch My PC Documentation before additional sources.
 Then, use the `retrieve` tool more than twice with refined subqueries to gather relevant context.
 Do NOT attempt to answer the question until you have retrieved enough relevant content.
+When retrieving documentation, do not summarize or skip steps.
+Return all relevant steps and instructions from the sources in their entirety, unless explicitly asked for a summary.
 
 The query is as follows:
 {input}

@@ -7,7 +7,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 
 load_dotenv()
 
-input_file = os.path.join(os.getenv("DATASET_STORAGE_FOLDER"), "data.txt")
+input_file = os.path.join(os.getenv("DATASET_STORAGE_FOLDER"), "cleaneddata.txt")
 output_file = os.path.join(os.getenv("DATASET_STORAGE_FOLDER"), "dataKB_Blogs.txt")
 
 # Initialize LLM

@@ -69,8 +69,8 @@ if st.button("Delete Vector DB"):
 
 # Chunking controls
 st.subheader("Chunking Parameters")
-chunk_size = st.slider("Chunk size", min_value=128, max_value=2048, step=64, value=1024)
-chunk_overlap = st.slider("Chunk overlap", min_value=0, max_value=1024, step=32, value=256)
+chunk_size = st.slider("Chunk size", min_value=128, max_value=2048, step=64, value=1600)
+chunk_overlap = st.slider("Chunk overlap", min_value=0, max_value=1024, step=32, value=500)
 
 # Embedding
 st.subheader("Embed Data into Vector Store")

@@ -64,7 +64,7 @@ def process_json_lines(file_path):
 
     return extracted
 
-file_content = process_json_lines(os.getenv("DATASET_STORAGE_FOLDER")+"cleaneddataKB_Blogs.txt")
+file_content = process_json_lines(os.getenv("DATASET_STORAGE_FOLDER")+"dataKB_Blogs.txt")
 
 
 #################################################################################################################################################################

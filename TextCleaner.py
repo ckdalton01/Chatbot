@@ -3,8 +3,8 @@ import re
 
 # Build paths relative to the current directory
 base_dir = os.path.join(os.getcwd(), "dataset")
-input_file = os.path.join(base_dir, "dataKB_Blogs2.txt")
-output_file = os.path.join(base_dir, "cleaneddataKB_Blogs.txt")
+input_file = os.path.join(base_dir, "data.txt")
+output_file = os.path.join(base_dir, "cleaneddata.txt")
 
 with open(input_file, "r", encoding="utf-8") as f:
     lines = f.readlines()

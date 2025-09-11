@@ -17,7 +17,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 load_dotenv()
 
 DATASET_FOLDER = os.getenv("DATASET_STORAGE_FOLDER")
-CLEAN_FILE = os.path.join(DATASET_FOLDER, "cleaneddataKB_Blogs.txt")
+CLEAN_FILE = os.path.join(DATASET_FOLDER, "dataKB_Blogs.txt")
 
 EMBED_MODEL = os.getenv("EMBEDDING_MODEL")
 embeddings = OllamaEmbeddings(model=EMBED_MODEL)

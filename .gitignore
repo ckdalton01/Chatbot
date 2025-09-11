@@ -1,4 +1,7 @@
-venv
+.idea
+.venv
+.env
 __pycache__/
+/dataset
 /chroma_db
 snapshot.txt
