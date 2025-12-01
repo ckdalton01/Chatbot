@@ -12,7 +12,7 @@ scraped_data = scraper.scrape_site(max_pages=500)
 dataset_dir = os.getenv("DATASET_STORAGE_FOLDER")
 os.makedirs(dataset_dir, exist_ok=True)
 
-output_file = os.path.join(dataset_dir, "data3.txt")
+output_file = os.path.join(dataset_dir, "data0.txt")
 
 # Extensions to skip
 skip_extensions = (

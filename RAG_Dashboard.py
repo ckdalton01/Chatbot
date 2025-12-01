@@ -15,7 +15,7 @@ env_file = ".env"
 prompt_file = "prompt.txt"
 db_path = os.getenv("DATABASE_LOCATION")
 dataset_path = os.path.join(os.getenv("DATASET_STORAGE_FOLDER"), "dataKB_Blogs.txt")
-script_options = ["chatbot.py", "chatbot-improved.py", "chatbotdeepseek.py"]
+script_options = ["chatbot.py", "chatbot-unfiltered.py"]
 known_models = [
     "llama3.2:3b", "llama3.3:70b"
 ]
@@ -27,8 +27,8 @@ if os.path.exists(prompt_file):
     with open(prompt_file, "r", encoding="utf-8") as f:
         current_prompt = f.read()
 
-st.set_page_config(page_title="RAG Dashboard")
-st.title("RAG System Dashboard")
+st.set_page_config(page_title="DaltonBot RAG Dashboard")
+st.title("DaltonBot RAG System Dashboard")
 
 # Script selection
 st.subheader("Select Chatbot Script")

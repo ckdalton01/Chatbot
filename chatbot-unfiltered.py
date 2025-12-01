@@ -18,7 +18,6 @@ import datetime
 import threading
 import getpass
 import logging
-import re
 
 ##############################################
 # CMTrace Custom Logging
@@ -54,7 +53,6 @@ class CMTraceFormatter(logging.Formatter):
 
 
 def setup_cmtrace_logger(log_file):
-    """Initialize logger with CMTrace-compatible formatting."""
     logger = logging.getLogger("cmtrace")
     logger.setLevel(logging.INFO)
 
@@ -78,58 +76,53 @@ logger = setup_cmtrace_logger(log_file)
 ##############################################
 load_dotenv()
 
-##############################################
-# Initialize embeddings model
-##############################################
+###############################   INITIALIZE EMBEDDINGS MODEL  #################################################################################################
+
 embeddings = OllamaEmbeddings(
     model=os.getenv("EMBEDDING_MODEL"),
 )
 
-##############################################
-# Initialize Chroma vector store
-##############################################
+###############################   INITIALIZE CHROMA VECTOR STORE   #############################################################################################
+
 vector_store = Chroma(
     collection_name=os.getenv("COLLECTION_NAME"),
     embedding_function=embeddings,
     persist_directory=os.getenv("DATABASE_LOCATION"),
 )
 
-##############################################
-# Initialize chat model
-##############################################
+###############################   INITIALIZE CHAT MODEL   #######################################################################################################
+
 llm = init_chat_model(
     os.getenv("CHAT_MODEL"),
     model_provider=os.getenv("MODEL_PROVIDER"),
     temperature=0,
     # GPU optimization
-    device="cuda",
-    batch_size=8,
+    device="cuda",  # Force GPU usage
+    batch_size=8,  # Good for RTX 4070's 12GB VRAM
     # CPU/memory optimization
-    n_threads=24,
-    context_window=8192,
+    n_threads=24,  # 24 physical cores of your i9-14900HX
+    context_window=8192,  # Leverage your 96GB RAM
     # Performance optimizations
-    quantization="int8",
-    use_flash_attention=True
+    quantization="int8",  # Better performance with minimal quality loss
+    use_flash_attention=True  # If supported
 )
 
-##############################################
-# Load system prompt template
-##############################################
+# pulling prompt from hub
 prompt_file_path = os.getenv("PROMPT_FILE")
+
 with open(prompt_file_path, "r", encoding="utf-8") as f:
     prompt_template_str = f.read()
 
 prompt = PromptTemplate.from_template(prompt_template_str)
 
-##############################################
-# Retriever tool with logging
-##############################################
+###############################   RETRIEVER TOOL WITH LOGGING   #################################################################################################
+
 @tool
 def retrieve(query: str):
     """Retrieve information related to a query."""
     logger.info(f"TOOL CALL - Retrieve invoked with query: {query}")
 
-    retrieved_docs = vector_store.similarity_search(query, k=6)
+    retrieved_docs = vector_store.similarity_search(query, k=4)
 
     if not retrieved_docs:
         logger.info("TOOL RESULT - No documents retrieved")
@@ -143,7 +136,9 @@ def retrieve(query: str):
 
     serialized = ""
     for i, (source, contents) in enumerate(grouped_docs.items(), 1):
+        preview = contents[0][:200].replace("\n", " ")
         logger.info(f"TOOL RESULT - Source {i}: {source}")
+        logger.info(f"TOOL RESULT - Content preview: {preview}...")
 
         # Merge all chunks for that source into one entry
         combined_content = "\n---\n".join(contents)
@@ -151,67 +146,28 @@ def retrieve(query: str):
 
     return serialized
 
-##############################################
-# Response relevance validation (0–100 scale)
-##############################################
-def validate_relevance(user_question: str, ai_message: str, threshold: int = 60) -> bool:
-    """
-    Validate if the response is relevant to the query using a 0–100 score.
-    Returns True if the score >= threshold, False otherwise.
-    """
-    validation_prompt = f"""
-    You are a strict relevance evaluator. 
-    You will compare a user question and an assistant response.
+###############################   AGENT SETUP   #################################################################################################
 
-    User question: "{user_question}"
-    Assistant response: "{ai_message}"
-
-    Rules:
-    1. Focus only on the user’s question. If the assistant discusses competitor products (not Patch My PC), score very low (0–20).
-    2. If the assistant answer is mostly about the right product/topic but phrased differently (e.g., describing features instead of answering directly), it is still relevant. Give a high score (70–100).
-    3. If the assistant answer mixes relevant information with unrelated or noisy content, treat it as "partially relevant." Give a medium score (40–69).
-    4. If the answer is completely off-topic, give a very low score (0–20).
-    
-    
-    Output format:
-    SCORE: <0–100>
-    JUSTIFICATION: <short explanation why you chose this score>
-    """
-
-    validation_result = llm.invoke([HumanMessage(content=validation_prompt)])
-    raw_output = validation_result.content.strip()
-
-    # Log raw validation result
-    logger.info(f"VALIDATION RAW OUTPUT: {raw_output}")
-
-    # Extract score
-    match = re.search(r"(\d{1,3})", raw_output)
-    score = int(match.group(1)) if match else 0
-
-    logger.info(f"VALIDATION INPUT - Question: {user_question}")
-    logger.info(f"VALIDATION INPUT - Response: {ai_message}")
-    logger.info(f"VALIDATION SCORE: {score}")
-
-    return score >= threshold
-
-##############################################
-# Agent setup
-##############################################
+# combining all tools
 tools = [retrieve]
+
+# initiating the agent
 agent = create_tool_calling_agent(llm, tools, prompt)
+
+# create the agent executor
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
-##############################################
-# Streamlit app #DaltonBot3000
-##############################################
-st.set_page_config(page_title="Patchy", page_icon="🐻")
-st.title("🐻 Patchy")
+###############################   STREAMLIT APP   #################################################################################################
 
-# Initialize chat history
+# initiating streamlit app
+st.set_page_config(page_title="DaltonBot3000", page_icon="🐻")
+st.title("🐻 DaltonBot3000")
+
+# initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat history on app rerun
+# display chat messages from history on app rerun
 for message in st.session_state.messages:
     if isinstance(message, HumanMessage):
         with st.chat_message("user"):
@@ -220,35 +176,28 @@ for message in st.session_state.messages:
         with st.chat_message("assistant"):
             st.markdown(message.content)
 
-# User input
-user_question = st.chat_input("You want to know about Patch My PC Documentation?")
+# create the bar where we can type messages
+user_question = st.chat_input("You want to know about our Documentation?")
 
+# did the user submit a prompt?
 if user_question:
-    # Add user message to chat
+    # add the message from the user (prompt) to the screen with streamlit
     with st.chat_message("user"):
         st.markdown(user_question)
         st.session_state.messages.append(HumanMessage(user_question))
 
     logger.info(f"USER INPUT: {user_question}")
 
-    # Invoke the agent
+    # invoking the agent
     logger.info("AGENT INVOCATION START")
     result = agent_executor.invoke({"input": user_question, "chat_history": st.session_state.messages})
     logger.info("AGENT INVOCATION END")
 
     ai_message = result["output"]
 
-    # Validate relevance with scoring
-    is_relevant = validate_relevance(user_question, ai_message, threshold=60)
+    # adding the response from the llm to the screen (and chat)
+    with st.chat_message("assistant"):
+        st.markdown(ai_message)
+        st.session_state.messages.append(AIMessage(ai_message))
 
-    if is_relevant:
-        # Show validated AI response
-        with st.chat_message("assistant"):
-            st.markdown(ai_message)
-            st.session_state.messages.append(AIMessage(ai_message))
-        logger.info(f"AI OUTPUT ACCEPTED: {ai_message}")
-    else:
-        # Handle irrelevant AI response
-        with st.chat_message("assistant"):
-            st.markdown("I'm afraid I do not have the answers you are looking for. I'm trained on Patch My PC Documentation only.")
-        logger.info("AI OUTPUT REJECTED - Response below threshold")
+    logger.info(f"AI OUTPUT: {ai_message}")
