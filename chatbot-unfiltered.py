@@ -160,8 +160,8 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 ###############################   STREAMLIT APP   #################################################################################################
 
 # initiating streamlit app
-st.set_page_config(page_title="DaltonBot3000", page_icon="🐻")
-st.title("🐻 DaltonBot3000")
+st.set_page_config(page_title=BRAND_NAME, page_icon=BRAND_ICON)
+st.title(f"{BRAND_ICON} {BRAND_NAME}")
 
 # initialize chat history
 if "messages" not in st.session_state:

@@ -78,6 +78,10 @@ logger = setup_cmtrace_logger(log_file)
 ##############################################
 load_dotenv()
 
+BRAND_NAME = os.getenv("BRAND_NAME", "Patchy")
+BRAND_ICON = os.getenv("BRAND_ICON", "🐻")
+BRAND_DOCS_NAME = os.getenv("BRAND_DOCS_NAME", "Patch My PC Documentation")
+
 ##############################################
 # Initialize embeddings model
 ##############################################
@@ -119,8 +123,8 @@ prompt_file_path = os.getenv("PROMPT_FILE")
 with open(prompt_file_path, "r", encoding="utf-8") as f:
     prompt_template_str = f.read()
 
+prompt_template_str = prompt_template_str.replace("{BRAND_DOCS_NAME}", BRAND_DOCS_NAME)
 prompt = PromptTemplate.from_template(prompt_template_str)
-
 ##############################################
 # Retriever tool with logging
 ##############################################
@@ -167,7 +171,7 @@ def validate_relevance(user_question: str, ai_message: str, threshold: int = 60)
     Assistant response: "{ai_message}"
 
     Rules:
-    1. Focus only on the user’s question. If the assistant discusses competitor products (not Patch My PC), score very low (0–20).
+    1. Focus only on the user’s question. If the assistant discusses competitor products and not {BRAND_DOCS_NAME}, score very low (0–20).
     2. If the assistant answer is mostly about the right product/topic but phrased differently (e.g., describing features instead of answering directly), it is still relevant. Give a high score (70–100).
     3. If the assistant answer mixes relevant information with unrelated or noisy content, treat it as "partially relevant." Give a medium score (40–69).
     4. If the answer is completely off-topic, give a very low score (0–20).
@@ -204,8 +208,8 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 ##############################################
 # Streamlit app #DaltonBot3000
 ##############################################
-st.set_page_config(page_title="Patchy", page_icon="🐻")
-st.title("🐻 Patchy")
+st.set_page_config(page_title=BRAND_NAME, page_icon=BRAND_ICON)
+st.title(f"{BRAND_ICON} {BRAND_NAME}")
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -221,7 +225,7 @@ for message in st.session_state.messages:
             st.markdown(message.content)
 
 # User input
-user_question = st.chat_input("You want to know about Patch My PC Documentation?")
+user_question = st.chat_input(f"You want to know about {BRAND_DOCS_NAME}?")
 
 if user_question:
     # Add user message to chat
@@ -250,5 +254,5 @@ if user_question:
     else:
         # Handle irrelevant AI response
         with st.chat_message("assistant"):
-            st.markdown("I'm afraid I do not have the answers you are looking for. I'm trained on Patch My PC Documentation only.")
+            st.markdown(f"I'm afraid I do not have the answers you are looking for. I'm trained on {BRAND_DOCS_NAME} only.")
         logger.info("AI OUTPUT REJECTED - Response below threshold")

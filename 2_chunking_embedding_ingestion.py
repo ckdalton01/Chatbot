@@ -83,17 +83,6 @@ for line in file_content:
     vector_store.add_documents(documents=texts, ids=uuids)
 
 
-for line in file_content:
-    print(line['url'])
-
-    texts = text_splitter.create_documents(
-        [line['raw_text']],
-        metadatas=[{"source": line['url'], "title": line['title']}]
-    )
-
-    uuids = [str(uuid4()) for _ in range(len(texts))]
-
-    vector_store.add_documents(documents=texts, ids=uuids)
     for i, line in enumerate(file_content):
         print(f"[{i+1}/{len(file_content)}] Embedding: {line['url']}")
 

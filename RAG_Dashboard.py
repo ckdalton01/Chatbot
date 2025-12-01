@@ -27,6 +27,12 @@ if os.path.exists(prompt_file):
     with open(prompt_file, "r", encoding="utf-8") as f:
         current_prompt = f.read()
 
+# Load branding vars with defaults
+current_brand_name = env_vars.get("BRAND_NAME", "Patchy")
+current_brand_icon = env_vars.get("BRAND_ICON", "🐻")
+current_brand_docs = env_vars.get("BRAND_DOCS_NAME", "Patch My PC Documentation")
+
+
 st.set_page_config(page_title="DaltonBot RAG Dashboard")
 st.title("DaltonBot RAG System Dashboard")
 
@@ -57,6 +63,44 @@ if st.button("Save Prompt and Model", disabled=is_deepseek):
             f.write(prompt_input)
         set_key(env_file, "CHAT_MODEL", selected_model)
         st.success("Prompt and model saved.")
+
+# Add a "Branding" section
+st.subheader("Branding Configuration")
+with st.expander("Customize Bot Appearance", expanded=False):
+    st.markdown("*Leave fields empty to use defaults*")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        brand_name_input = st.text_input(
+            "Bot Name", 
+            value=current_brand_name,
+            help="Default: Patchy",
+            placeholder="Patchy"
+        )
+        brand_icon_input = st.text_input(
+            "Bot Icon (emoji)", 
+            value=current_brand_icon,
+            help="Default: 🐻",
+            placeholder="🐻"
+        )
+    
+    with col2:
+        brand_docs_input = st.text_input(
+            "Documentation Name", 
+            value=current_brand_docs,
+            help="Default: Patch My PC Documentation",
+            placeholder="Patch My PC Documentation"
+        )
+    
+    if st.button("💾 Save Branding"):
+        # Save to .env (use empty string if user cleared the field)
+        set_key(env_file, "BRAND_NAME", brand_name_input or "Patchy")
+        set_key(env_file, "BRAND_ICON", brand_icon_input or "🐻")
+        set_key(env_file, "BRAND_DOCS_NAME", brand_docs_input or "Patch My PC Documentation")
+        st.success("Branding saved!")
+        st.info("Restart the chatbot to see changes.")
+
 
 # Delete chroma DB
 st.subheader("Vector Store Management")
